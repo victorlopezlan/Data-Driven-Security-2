@@ -34,21 +34,25 @@ library(gridExtra)
 
 ```{r descarrega_web}
 #Descargamos la web con GET y la almacenamos en una variable.
-pagina_web <- httr::GET(url = "https://www.mediawiki.org/wiki/MediaWiki")
+get_response <- httr::GET(url = "https://www.mediawiki.org/wiki/MediaWiki")
 
 #Convertimos el Response estandar anterior en un XML
-web <- XML::htmlParse(pagina_web)
-web
+web_xml <- XML::htmlParse(get_response)
+web_xml
+```
+
+## **Ejercicio 1.2**
+
+**Analizar el contenido de la web, buscando el título de la página (que en HTML se etiqueta como “title”). En las cabeceras web encontramos información como el título, los ficheros de estilo visual, y meta-información como el nombre del autor de la página, una descripción de esta, el tipo de codificación de esta, o palabras clave que indican qué tipo de información contiene la página. Una vez descargada la página, y convertida a un formato analizable (como XML), buscaremos los elementos de tipo title.**
+
+```{r analizar_web}
+#Buscamos el elemento tipo title de la página web
+title <- XML::xpathSApply(web_xml, "//title",xmlValue)
+title
+
+#TODO -> Limpiar el title
+
+
 ```
 
 
-
-## 1. Descarrega de la pàgina web
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
