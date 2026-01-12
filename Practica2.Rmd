@@ -6,20 +6,44 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(warning = F)
+knitr::opts_chunk$set(error = F)
+knitr::opts_chunk$set(message = F)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Instalamos las librerías necesarias para hacer la práctica:
+library(httr)
+library(XML)
+library(ggplot2)
+library(gridExtra)
 
-```{r cars}
-summary(cars)
+```{r carrega_llibreries}
+library(httr2)
+library(XML)
+library(ggplot2)
+library(gridExtra)
 ```
 
-## Including Plots
+## **Ejercicio 1.1**
+
+**Descargar la página web de la URL indicada, y almacenarlo en un formato de R apto para ser tratado.El primer paso para realizar tareas de crawling y scraping es poder descargar los datos de la web. Para esto usaremos la capacidad de R y de sus librerías (httr y XML) para descargar webs y almacenarlas en variables que podamos convertir en un formato fácil de analizar (p.e. de HTML a XML).**
+
+
+```{r descarrega_web}
+#Descargamos la web con GET y la almacenamos en una variable.
+pagina_web <- httr::GET(url = "https://www.mediawiki.org/wiki/MediaWiki")
+
+#Convertimos el Response estandar anterior en un XML
+web <- XML::htmlParse(pagina_web)
+web
+```
+
+
+
+## 1. Descarrega de la pàgina web
 
 You can also embed plots, for example:
 
