@@ -38,21 +38,62 @@ get_response <- httr::GET(url = "https://www.mediawiki.org/wiki/MediaWiki")
 
 #Convertimos el Response estandar anterior en un XML
 web_xml <- XML::htmlParse(get_response)
-web_xml
+#web_xml
 ```
 
 ## **Ejercicio 1.2**
 
 **Analizar el contenido de la web, buscando el título de la página (que en HTML se etiqueta como “title”). En las cabeceras web encontramos información como el título, los ficheros de estilo visual, y meta-información como el nombre del autor de la página, una descripción de esta, el tipo de codificación de esta, o palabras clave que indican qué tipo de información contiene la página. Una vez descargada la página, y convertida a un formato analizable (como XML), buscaremos los elementos de tipo title.**
 
-```{r analizar_web}
+```{r analizar_web_title}
 #Buscamos el elemento tipo title de la página web
 title <- XML::xpathSApply(web_xml, "//title",xmlValue)
 title
-
-#TODO -> Limpiar el title
-
-
 ```
 
 
+## **Ejercicio 1.3**
+
+**Analizar el contenido de la web, buscando todos los enlaces (que en HTML se etiquetan como “a”), buscando el texto del enlace, así como la URL.Vamos a extraer, usando las funciones de búsqueda XML, todos los enlaces que salen de esta página con tal de listarlos y poder descargarlas más tarde. Sabemos que estos son elementos de tipo “< a >”, que tienen el atributo “href” para indicar la URL del enlace. Del enlace nos quedaremos con la URL de destino y con el valor del enlace (texto del enlace).**
+
+```{r analizar_web_urls}
+#Buscamos todos los elementos de tipo enlace (a) de la página web y obtenemos su valor.
+links_text <- XML::xpathSApply(web_xml, "//a", xmlValue)
+#links_text
+
+#Buscamos todos los elementos de tipo enlace (a) de la página web y obtenemos su valor de href.
+links_url <- XML::xpathSApply(web_xml, "//a", xmlGetAttr, 'href')
+#links_url
+
+#Tratamos los valores NULL
+links_text_nulls <- sapply(links_text, is.null)
+#links_text_nulls
+links_text[links_text_nulls] <- NA
+links_url_nulls <- sapply(links_url, is.null)
+links_url[links_url_nulls] <- NA 
+
+vector_links_text_nulls <- unlist(links_text)
+vector_links_url_nulls <- unlist(links_url)
+
+vector_links_text_nulls
+vector_links_url_nulls
+
+#TODO: Decidir si Limpiar espacios en blanco y los valores vacios
+
+```
+
+## **Ejercicio 1.4**
+
+**Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo. En este paso nos interesa reunir los datos obtenidos en el anterior paso. Tendremos que comprobar, para cada enlace, cuantas veces aparece.**
+
+```{r crear_tabla}
+tabla_valores <- data.frame(URL = vector_links_url_nulls, Valores = vector_links_text_nulls)
+DT::datatable(
+  tabla_valores,
+  options = list(
+    pageLength = 10,
+    scrollX = TRUE,
+    caption = "Todo el conjunto de datos:"
+  )
+)
+```
