@@ -21,10 +21,11 @@ library(ggplot2)
 library(gridExtra)
 
 ```{r carrega_llibreries}
-library(httr2)
+library(httr)
 library(XML)
 library(ggplot2)
 library(gridExtra)
+library(dplyr)
 ```
 
 ## **Ejercicio 1.1**
@@ -34,7 +35,10 @@ library(gridExtra)
 
 ```{r descarrega_web}
 #Descargamos la web con GET y la almacenamos en una variable.
-get_response <- httr::GET(url = "https://www.mediawiki.org/wiki/MediaWiki")
+dominio_web <- "https://www.mediawiki.org"
+url_web <- "https://www.mediawiki.org/wiki/MediaWiki"
+
+get_response <- httr::GET(url_web)
 
 #Convertimos el Response estandar anterior en un XML
 web_xml <- XML::htmlParse(get_response)
@@ -87,7 +91,7 @@ vector_links_url_nulls
 **Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo. En este paso nos interesa reunir los datos obtenidos en el anterior paso. Tendremos que comprobar, para cada enlace, cuantas veces aparece.**
 
 ```{r crear_tabla}
-tabla_valores <- data.frame(URL = vector_links_url_nulls, Valores = vector_links_text_nulls)
+tabla_valores <- data.frame(Enlace = vector_links_url_nulls, Texto = vector_links_text_nulls)
 DT::datatable(
   tabla_valores,
   options = list(
@@ -96,4 +100,63 @@ DT::datatable(
     caption = "Todo el conjunto de datos:"
   )
 )
+
+#Creamos la nueva variable de la tabla 
+tabla_vistos <- tabla_valores %>% group_by(Enlace, Texto) %>% summarise (Visto = n())
+DT::datatable(
+  tabla_vistos,
+  options = list(
+    pageLength = 10,
+    scrollX = TRUE,
+    caption = "Todo el conjunto de datos:"
+  )
+)
+```
+
+
+## **Ejercicio 1.5**
+
+**Para cada enlace, seguirlo e indicar si está activo (podemos usar el código de status HTTP al hacer una petición a esa URL).**
+
+```{r obtencion_status}
+#Normalización de los valores
+estado_enlaces <- stringr::str_replace(tabla_vistos$Enlace,"^#",stringr::str_c(url_web,"#"))
+estado_enlaces <- stringr::str_replace(estado_enlaces,"^//","https://")
+estado_enlaces <- stringr::str_replace(estado_enlaces,"^/",stringr::str_c(dominio_web,"/"))
+
+estado_enlaces
+
+#Añadimos la columna de los enlaces normalizados
+
+tabla_vistos$Enlace_Normalizado <- estado_enlaces
+tabla_vistos <- tabla_vistos[, c(1, 4, 2, 3)]
+DT::datatable(
+  tabla_vistos,
+  options = list(
+    pageLength = 10,
+    scrollX = TRUE,
+    caption = "Todo el conjunto de datos:"
+  )
+)
+
+#Hacemos el HEAD 
+safe_head <- function(url) {
+  Sys.sleep(0.5)  
+  tryCatch(
+    status_code(HEAD(url)),
+    error = function(e) NA
+  )
+}
+
+tabla_vistos$status <- sapply(tabla_vistos$Enlace_Normalizado, safe_head)
+DT::datatable(
+  tabla_vistos,
+  options = list(
+    pageLength = 10,
+    scrollX = TRUE,
+    caption = "Todo el conjunto de datos:"
+  )
+)
+
+
 ```
