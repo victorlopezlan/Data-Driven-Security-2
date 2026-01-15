@@ -26,6 +26,7 @@ library(XML)
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
+library(rlang)
 ```
 
 ## **Ejercicio 1.1**
@@ -82,7 +83,6 @@ vector_links_url_nulls <- unlist(links_url)
 vector_links_text_nulls
 vector_links_url_nulls
 
-#TODO: Decidir si Limpiar espacios en blanco y los valores vacios
 
 ```
 
@@ -158,5 +158,35 @@ DT::datatable(
   )
 )
 
+
+```
+
+# Pregunta 2
+## **Ejercicio 2.1**
+
+**Un histograma con la frecuencia de aparición de los enlaces, pero separado por URLs absolutas (con “http…”) y URLs relativas.**
+
+
+```{r creacion_histograma}
+#Quitamos la agrupación de los datos
+tabla_vistos <- dplyr::ungroup(tabla_vistos)
+
+#Clasificamos URLs absolutas y relativas usando el enlace ORIGINAL (la columna con los enlaces sin normalizar)
+tabla_vistos$Tipo_URL <- ifelse(
+  grepl("^http", tabla_vistos$Enlace),
+  "Absoluta",
+  "Relativa"
+)
+
+#Creamos el histograma
+ggplot(tabla_vistos, aes(x = Visto, fill = Tipo_URL)) +
+  geom_bar(position = "dodge", color = "black") +
+  labs(
+    title = "Frecuencia de aparición de enlaces",
+    x = "Número de veces que aparece un enlace",
+    y = "Número de enlaces",
+    fill = "Tipo de URL"
+  ) +
+  theme_minimal(base_size = 14)
 
 ```
