@@ -37,7 +37,7 @@ web_xml <- XML::htmlParse(get_response)
 # --------------------------------------------------#
 print("Ejercicio 1.2")
 title <- XML::xpathSApply(web_xml, "//title", xmlValue)
-print(title)
+cat(title)
 
 # --------------------------------------------------#
 #   Ejercicio 1.3 - Extracción de enlaces           #
@@ -56,25 +56,33 @@ links_url[sapply(links_url, is.null)] <- NA
 vector_links_text_nulls <- unlist(links_text)
 vector_links_url_nulls <- unlist(links_url)
 
-print(head(vector_links_text_nulls))
-print(head(vector_links_url_nulls))
+#print(head(vector_links_text_nulls))
+#print(head(vector_links_url_nulls))
+
+tabla_valores <- data.frame(Enlace = vector_links_url_nulls, Texto = vector_links_text_nulls)
+DT::datatable(
+  tabla_valores,
+  options = list(
+    pageLength = 10,
+    scrollX = TRUE,
+    caption = "Todo el conjunto de datos:"
+  )
+)
 
 # --------------------------------------------------#
 # Ejercicio 1.4 - Tabla de enlaces y frecuencia     #
 # --------------------------------------------------#
 print("Ejercicio 1.4")
-tabla_valores <- data.frame(
-  Enlace = vector_links_url_nulls,
-  Texto = vector_links_text_nulls,
-  stringsAsFactors = FALSE
+#Creamos la nueva variable de la tabla 
+tabla_vistos <- tabla_valores %>% group_by(Enlace, Texto) %>% summarise (Visto = n())
+DT::datatable(
+  tabla_vistos,
+  options = list(
+    pageLength = 10,
+    scrollX = TRUE,
+    caption = "Todo el conjunto de datos:"
+  )
 )
-
-# Tabla con número de apariciones
-tabla_vistos <- tabla_valores %>%
-  group_by(Enlace, Texto) %>%
-  summarise(Visto = n(), .groups = "drop")
-
-print(tabla_vistos)
 
 # --------------------------------------------------#
 # Ejercicio 1.5 - Comprobación del estado HTTP      #
@@ -86,8 +94,18 @@ estado_enlaces <- stringr::str_replace(tabla_vistos$Enlace, "^#", paste0(url_web
 estado_enlaces <- stringr::str_replace(estado_enlaces, "^//", "https://")
 estado_enlaces <- stringr::str_replace(estado_enlaces, "^/", paste0(dominio_web, "/"))
 
+#Añadimos la columna de los enlaces normalizados
+
 tabla_vistos$Enlace_Normalizado <- estado_enlaces
-tabla_vistos <- tabla_vistos[, c("Enlace", "Enlace_Normalizado", "Texto", "Visto")]
+tabla_vistos <- tabla_vistos[, c(1, 4, 2, 3)]
+DT::datatable(
+  tabla_vistos,
+  options = list(
+    pageLength = 10,
+    scrollX = TRUE,
+    caption = "Todo el conjunto de datos:"
+  )
+)
 
 # Función segura para HEAD
 safe_head <- function(url) {
@@ -122,5 +140,38 @@ ggplot(tabla_vistos, aes(x = Visto, fill = Tipo_URL)) +
     x = "Número de veces que aparece un enlace",
     y = "Número de enlaces",
     fill = "Tipo de URL"
+  ) +
+  theme_minimal(base_size = 14)
+
+# --------------------------------------------------#
+#    Ejercicio 2.2 - Dominio MediaWiki vs Otros     #
+# --------------------------------------------------#
+print("Ejercicio 2.2")
+# Clasificamos los enlaces según el dominio
+tabla_vistos$Dominio <- ifelse(
+  is.na(tabla_vistos$Enlace_Normalizado),
+  NA,
+  ifelse(
+    grepl("^http", tabla_vistos$Enlace_Normalizado) & 
+      !grepl("^https://www.mediawiki.org", tabla_vistos$Enlace_Normalizado),
+    "Otros dominios",
+    "MediaWiki"
+  )
+)
+
+# Agregamos sumando las apariciones de los enlaces
+tabla_dominios <- tabla_vistos %>%
+  group_by(Dominio) %>%
+  summarise(
+    Total_Enlaces = sum(Visto, na.rm = TRUE)
+  )
+
+# Creamos el gráfico de barras
+ggplot(tabla_dominios, aes(x = Dominio, y = Total_Enlaces, fill = Dominio)) +
+  geom_bar(stat = "identity", color = "black") + scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "Total enlaces MediaWiki vs Otros dominios",
+    x = "Dominio",
+    y = "Total de enlaces"
   ) +
   theme_minimal(base_size = 14)

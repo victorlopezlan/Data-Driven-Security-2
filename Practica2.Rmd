@@ -12,14 +12,9 @@ knitr::opts_chunk$set(error = F)
 knitr::opts_chunk$set(message = F)
 ```
 
+## **Ejercicio 1.1**
 
-
-Instalamos las librerías necesarias para hacer la práctica:
-library(httr)
-library(XML)
-library(ggplot2)
-library(gridExtra)
-
+**Descargar la página web de la URL indicada, y almacenarlo en un formato de R apto para ser tratado.El primer paso para realizar tareas de crawling y scraping es poder descargar los datos de la web. Para esto usaremos la capacidad de R y de sus librerías (httr y XML) para descargar webs y almacenarlas en variables que podamos convertir en un formato fácil de analizar (p.e. de HTML a XML).**
 ```{r carrega_llibreries}
 library(httr)
 library(XML)
@@ -28,12 +23,6 @@ library(gridExtra)
 library(dplyr)
 library(rlang)
 ```
-
-## **Ejercicio 1.1**
-
-**Descargar la página web de la URL indicada, y almacenarlo en un formato de R apto para ser tratado.El primer paso para realizar tareas de crawling y scraping es poder descargar los datos de la web. Para esto usaremos la capacidad de R y de sus librerías (httr y XML) para descargar webs y almacenarlas en variables que podamos convertir en un formato fácil de analizar (p.e. de HTML a XML).**
-
-
 ```{r descarrega_web}
 #Descargamos la web con GET y la almacenamos en una variable.
 dominio_web <- "https://www.mediawiki.org"
@@ -46,20 +35,28 @@ web_xml <- XML::htmlParse(get_response)
 #web_xml
 ```
 
+Cargamos e instalamos las librerías necesarias para hacer la práctica: HTTR, XML, ggplot2, gridExtra
+
+Utilizando la librería HTTR hacemos un GET para descargarnos la página web "https://www.mediawiki.org/wiki/MediaWiki". Después, mediante la librería XML obtenemos el xml de la web.
+
 ## **Ejercicio 1.2**
 
 **Analizar el contenido de la web, buscando el título de la página (que en HTML se etiqueta como “title”). En las cabeceras web encontramos información como el título, los ficheros de estilo visual, y meta-información como el nombre del autor de la página, una descripción de esta, el tipo de codificación de esta, o palabras clave que indican qué tipo de información contiene la página. Una vez descargada la página, y convertida a un formato analizable (como XML), buscaremos los elementos de tipo title.**
 
-```{r analizar_web_title}
+Buscamos elemento tipo title mediante xpathSApply:
+
+```{r analizar_web_title, comment = NA}
 #Buscamos el elemento tipo title de la página web
 title <- XML::xpathSApply(web_xml, "//title",xmlValue)
-title
+cat(title)
 ```
 
 
 ## **Ejercicio 1.3**
 
 **Analizar el contenido de la web, buscando todos los enlaces (que en HTML se etiquetan como “a”), buscando el texto del enlace, así como la URL.Vamos a extraer, usando las funciones de búsqueda XML, todos los enlaces que salen de esta página con tal de listarlos y poder descargarlas más tarde. Sabemos que estos son elementos de tipo “< a >”, que tienen el atributo “href” para indicar la URL del enlace. Del enlace nos quedaremos con la URL de destino y con el valor del enlace (texto del enlace).**
+
+Realizamos el análisis, obtenemos todos los enlaces y el texto:
 
 ```{r analizar_web_urls}
 #Buscamos todos los elementos de tipo enlace (a) de la página web y obtenemos su valor.
@@ -80,17 +77,9 @@ links_url[links_url_nulls] <- NA
 vector_links_text_nulls <- unlist(links_text)
 vector_links_url_nulls <- unlist(links_url)
 
-vector_links_text_nulls
-vector_links_url_nulls
+#vector_links_text_nulls
+#vector_links_url_nulls
 
-
-```
-
-## **Ejercicio 1.4**
-
-**Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo. En este paso nos interesa reunir los datos obtenidos en el anterior paso. Tendremos que comprobar, para cada enlace, cuantas veces aparece.**
-
-```{r crear_tabla}
 tabla_valores <- data.frame(Enlace = vector_links_url_nulls, Texto = vector_links_text_nulls)
 DT::datatable(
   tabla_valores,
@@ -101,6 +90,13 @@ DT::datatable(
   )
 )
 
+```
+
+## **Ejercicio 1.4**
+
+**Generar una tabla con cada enlace encontrado, indicando el texto que acompaña el enlace, y el número de veces que aparece un enlace con ese mismo objetivo. En este paso nos interesa reunir los datos obtenidos en el anterior paso. Tendremos que comprobar, para cada enlace, cuantas veces aparece.**
+
+```{r crear_tabla}
 #Creamos la nueva variable de la tabla 
 tabla_vistos <- tabla_valores %>% group_by(Enlace, Texto) %>% summarise (Visto = n())
 DT::datatable(
@@ -118,13 +114,15 @@ DT::datatable(
 
 **Para cada enlace, seguirlo e indicar si está activo (podemos usar el código de status HTTP al hacer una petición a esa URL).**
 
-```{r obtencion_status}
+Primero normalizamos los enlaces, creamos una nueva columna con las URLs normalizadas que utilizaremos posteriormente para obtener los status. Mantenemos la columna de las URLs sin normalizar para no alterar la columna Visto.
+
+```{r normalizacion_enlaces}
 #Normalización de los valores
 estado_enlaces <- stringr::str_replace(tabla_vistos$Enlace,"^#",stringr::str_c(url_web,"#"))
 estado_enlaces <- stringr::str_replace(estado_enlaces,"^//","https://")
 estado_enlaces <- stringr::str_replace(estado_enlaces,"^/",stringr::str_c(dominio_web,"/"))
 
-estado_enlaces
+#estado_enlaces
 
 #Añadimos la columna de los enlaces normalizados
 
@@ -138,7 +136,13 @@ DT::datatable(
     caption = "Todo el conjunto de datos:"
   )
 )
+```
 
+Una vez tenemos las URLs normalizadas,podemos obtener los status:
+
+Nota: para no ser baneados establecemos un sleep(0.5)
+
+``` {r obtencion_status}
 #Hacemos el HEAD 
 safe_head <- function(url) {
   Sys.sleep(0.5)  
@@ -157,7 +161,6 @@ DT::datatable(
     caption = "Todo el conjunto de datos:"
   )
 )
-
 
 ```
 
@@ -186,6 +189,42 @@ ggplot(tabla_vistos, aes(x = Visto, fill = Tipo_URL)) +
     x = "Número de veces que aparece un enlace",
     y = "Número de enlaces",
     fill = "Tipo de URL"
+  ) +
+  theme_minimal(base_size = 14)
+
+```
+
+## **Ejercicio 2.2**
+
+**Un gráfico de barras indicando la suma de enlaces que apuntan a otros dominios o servicios (distinto a https://www.mediawiki.org en el caso de ejemplo) vs. la suma de los otros enlaces. Aquí queremos distinguir enlaces que apuntan a mediawiki versus el resto. Sabemos que las URLs relativas ya apuntan dentro, por lo tanto hay que analizar las URLs absolutas y comprobar que apunten a https://www.mediawiki.org.**
+
+```{r grafico_de_barras}
+# Clasificamos los enlaces según el dominio
+tabla_vistos$Dominio <- ifelse(
+  is.na(tabla_vistos$Enlace_Normalizado),
+  NA,
+  ifelse(
+    grepl("^http", tabla_vistos$Enlace_Normalizado) & 
+      !grepl("^https://www.mediawiki.org", tabla_vistos$Enlace_Normalizado),
+    "Otros dominios",
+    "MediaWiki"
+  )
+)
+
+# Agregamos sumando las apariciones de los enlaces
+tabla_dominios <- tabla_vistos %>%
+  group_by(Dominio) %>%
+  summarise(
+    Total_Enlaces = sum(Visto, na.rm = TRUE)
+  )
+
+# Creamos el gráfico de barras
+ggplot(tabla_dominios, aes(x = Dominio, y = Total_Enlaces, fill = Dominio)) +
+  geom_bar(stat = "identity", color = "black") + scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "Total enlaces MediaWiki vs Otros dominios",
+    x = "Dominio",
+    y = "Total de enlaces"
   ) +
   theme_minimal(base_size = 14)
 
