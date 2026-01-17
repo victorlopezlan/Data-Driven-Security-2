@@ -175,3 +175,25 @@ ggplot(tabla_dominios, aes(x = Dominio, y = Total_Enlaces, fill = Dominio)) +
     y = "Total de enlaces"
   ) +
   theme_minimal(base_size = 14)
+
+
+# --------------------------------------------------#
+#         Ejercicio 2.3 - Porcentaje de status      #
+# --------------------------------------------------#
+print("Ejercicio 2.3")
+# Cambiamos 'status' a factor
+tabla_vistos$status <- as.factor(tabla_vistos$status)
+
+# Creamos el gráfico de tarta teniendo en cuenta 'status' y el número de 'Visto'
+tabla_vistos %>%
+  group_by(status) %>%
+  summarise(total = sum(Visto, na.rm = TRUE)) %>%
+  mutate(
+    porcentaje = total / sum(total),
+    label = scales::percent(porcentaje, accuracy = 0.1)
+  ) %>%
+  ggplot(aes(x = "", y = total, fill = status)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5)) +
+  theme_void()
