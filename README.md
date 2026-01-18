@@ -15,6 +15,8 @@ Este repositorio contiene un proyecto desarrollado en R con RStudio para realiza
 
 ├── Practica2.html
 
+├── Practica2.pdf
+
 └── README.md
 
 
@@ -50,6 +52,9 @@ Informe final generado a partir del archivo Pratica2.Rmd.
 
 Puede abrirse directamente en cualquier navegador web y se sobreescribe cada vez que se renderiza Practica2.Rmd.
 
+Practica2.pdf
+
+Informe final en formato .pdf generado a partir del archivo Pratica2.Rmd.
 
 
 **Requisitos**
