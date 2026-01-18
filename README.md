@@ -54,11 +54,9 @@ Puede abrirse directamente en cualquier navegador web y se sobreescribe cada vez
 
 **Requisitos**
 
-R
-
-RStudio
-
-Paquetes utilizados: httr, XML, ggplot2, gridExtra, dplyr, rlang, DT, stringr, scales, knitr
+- R
+- RStudio
+- Paquetes utilizados: httr, XML, ggplot2, gridExtra, dplyr, rlang, DT, stringr, scales, knitr
 
 
 
@@ -68,6 +66,5 @@ Clonar el repositorio: <https://github.com/victorlopezlan/Data-Driven-Security-2
 
 Abrir el proyecto en RStudio y ejecutar:
 
-Practica2.R , seleccionar todo el código y Control + Shift + Intro
-
-Practica2.Rmd para generar el informe en HTML, Control + Shift + K
+- Practica2.R , seleccionar todo el código y Control + Shift + Intro
+- Practica2.Rmd para generar el informe en HTML, Control + Shift + K
