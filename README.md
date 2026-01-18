@@ -6,6 +6,7 @@
 
 Este repositorio contiene un proyecto desarrollado en R con RStudio para realizar tareas de crawling y scraping sobre una página web (MediaWiki) y analizar los enlaces extraídos. El trabajo se presenta en un documento R Markdown (.Rmd) que puede renderizarse a HTML con resultados, tablas y visualizaciones, y en un script .R.
 
+
 **Estructura del proyecto**
 
 ├── Practica2.R
@@ -15,6 +16,7 @@ Este repositorio contiene un proyecto desarrollado en R con RStudio para realiza
 ├── Practica2.html
 
 └── README.md
+
 
 
 **Descripción de los archivos**
@@ -49,6 +51,7 @@ Informe final generado a partir del archivo Pratica2.Rmd.
 Puede abrirse directamente en cualquier navegador web y se sobreescribe cada vez que se renderiza Practica2.Rmd.
 
 
+
 **Requisitos**
 
 R
@@ -56,6 +59,7 @@ R
 RStudio
 
 Paquetes utilizados: httr, XML, ggplot2, gridExtra, dplyr, rlang, DT, stringr, scales, knitr
+
 
 
 **Uso del proyecto**
@@ -67,8 +71,3 @@ Abrir el proyecto en RStudio y ejecutar:
 Practica2.R , seleccionar todo el código y Control + Shift + Intro
 
 Practica2.Rmd para generar el informe en HTML, Control + Shift + K
-
-
-Notas
-
-El dataset debe mantenerse en formato CSV y en la ruta indicada.
